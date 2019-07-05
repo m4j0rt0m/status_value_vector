@@ -1,56 +1,90 @@
 /*
- *  File:                   epi_tracer_last_child_instr_comb_logic.v
- *  Description:            Combinational logic for the last-child-instruction (LCI) vector update
- *  Project:                EPI - Vector lane
- *  Author:                 Abraham J. Ruiz R. (abraham.ruiz@bsc.es)
- *  Revision:               0.1 - First tracer version
+ *  File:                   status_valid_vector.v
+ *  Description:            Combinational logic for the vector update
+ *  Project:                Status Valid Vector
+ *  Author:                 Abraham J. Ruiz R. (https://github.com/m4j0rt0m)
+ *  Revision:               0.1 - First version
  */
-module epi_tracer_last_child_instr_comb_logic
-(/*AUTOARG*/);
+module status_valid_vector
+# (
+    parameter DEPTH = 16
+  )
+(/*AUTOARG*/
+   // Outputs
+   valid_o, full_o,
+   // Inputs
+   clk_i, rsn_i, push_i, pull_i, value_i
+   );
 
   /* ports */
-  input       push_i;     //..push a new instruction into queue (mapped)
-  input       pull_i;     //..pull a instructions from queue (commited)
-  input       update_i;   //..update or not the LCI vector bit
-  input       carry_a_i;  //..next update mask bit (i+1)
-  input       carry_b_i;  //..next update mask bit (i+2)
-  input       last_i;     //..multi-instruction / last-child-instruction
-  input       next_i;     //..next bit in LCI vector (i+1)
-  input       prev_i;     //..previous bit in LCI vector (n-1)
-  input       actual_i;   //..actual registered bit in LCI vector (i)
+  input       clk_i;    //..clock signal
+  input       rsn_i;    //..active low reset
+  input       push_i;   //..push a new status entry
+  input       pull_i;   //..pull the next oldest entry
+  input       value_i;  //..update value
+  output reg  valid_o;  //..valid entry in the status vector
+  output reg  full_o;   //..status vector is full
 
-  output reg  q_o;        //..bit to be registered in LCI vector (i)
+  /* integers and genvars */
+  genvar I;
 
-  /* local parameters <push and pull> */
-  localparam  NN        = 2'b00;  //..neither push nor pull (there is no change)
-  localparam  NP        = 2'b01;  //..push and no pull
-  localparam  PN        = 2'b10;  //..pull and no push
-  localparam  PP        = 2'b11;  //..both push and pull
+  /* regs and wires */
+  wire  [DEPTH-1:0] nxt_vector_d;
+  wire  [DEPTH-1:0] status_vector_d;
+  wire  [DEPTH-1:0] update_vector_d;
+  wire  [DEPTH-1:0] carry_vector_d;
+  reg   [DEPTH-1:0] valid_vector_q;
+  reg   [DEPTH-1:0] status_vector_q;
 
-  /* update mask bits */
-  wire  update_en_a = update_i & ~carry_a_i;  //..update-bit enable (i), as a head pointer
-  wire  update_en_b = carry_a_i & ~carry_b_i; //..update-bit enable (i+1), modified head pointer
+  /* expand vectors assignment */
+  assign  nxt_vector_d    = {1'b0, status_vector[DEPTH-1:1]};
+  assign  update_vector_d = {valid_vector_q[DEPTH-2:1], 1'b1};
+  assign  carry_vector_d  = {1'b0, valid_vector_q[DEPTH-1:1]};
 
-  /* logic */
-  always @ (*) begin
-    case({pull_i, push_i})
-      NN:  begin
-        q_o     = actual_i;
-        carry_o = 1'b0;
-      end
-      NP:  begin
-        if(update_en_a)
-          q_o = last_i;
-        else
-          q_o = actual_i;
-      end
-      PN:  begin
-        q_o = next_i;
-      end
-      PP:  begin
-        if(carry_i)
-      end
-    endcase
+  /* valid vector */
+  always @ (posedge clk_i, negedge rsn_i) begin
+    if(~rsn_i)  //..asynchronous reset
+      valid_vector_q <=  {DEPTH{1'b0}};
+    else  begin
+      case({pull,push})
+        2'b10:  begin   //..shift to the left
+          valid_vector_q[0]          <=  1'b1;
+          valid_vector_q[DEPTH-1:1]  <=  valid_vector_q[DEPTH-2:0];
+        end
+        2'b10:  begin   //..shift to the right
+          valid_vector_q[DEPTH-2:0]  <=  valid_vector_q[DEPTH-1:1];
+          valid_vector_q[DEPTH-1]    <=  1'b0;
+        end
+        default:  begin //..stays the same
+          valid_vector_q <=  valid_vector_q;
+        end
+      endcase
+    end
+  end
+
+  /* update-bit combinational logic */
+  generate
+    for(I=0; I<DEPTH; I=I+1)  begin:  comb_logic
+      status_valid_logic  (
+        .push_i   (push_i),
+        .pull_i   (pull_i),
+        .update_i (update_vector_d[I]),
+        .valid_i  (valid_vector_q[I]),
+        .carry_i  (carry_vetor_d[I]),
+        .value_i  (value_i),
+        .next_i   (nxt_vector_d[i]),
+        .actual_i (status_vector_q[I]),
+        .q_o      (status_vector_d[I])
+      );
+    end
+  endgenerate
+
+  /* status vector */
+  always @ (posedge clk_i, negedge rsn_i) begin
+    if(~rsn_i)
+      status_vector_q <=  {DEPTH{1'b0}};
+    else
+      status_vector_q <=  status_vector_d;
   end
 
 endmodule
