@@ -5,21 +5,22 @@
  *  Author:                 Abraham J. Ruiz R. (https://github.com/m4j0rt0m)
  *  Revision:               0.1 - First version
  */
-module status_valid_logic
+module status_value_logic
 (/*AUTOARG*/
    // Outputs
    q_o,
    // Inputs
-   push_i, pull_i, update_i, valid_i, carry_i, value_i, next_i,
-   actual_i
+   push_i, pull_i, update_i, valid_i, carry_i, empty_i, value_i,
+   next_i, actual_i
    );
 
   /* ports */
-  input       push_i;   //..push a new instruction into queue (mapped)
-  input       pull_i;   //..pull a instructions from queue (commited)
+  input       push_i;   //..push a new entry
+  input       pull_i;   //..pull an entry from queue
   input       update_i; //..update or not the status vector bit
-  input       valid_i;  //..next update mask bit (i+1)
-  input       carry_i;  //..next update mask bit (i+2)
+  input       valid_i;  //..valid update mask bit (i)
+  input       carry_i;  //..next update mask bit (i+1)
+  input       empty_i;  //..empty status vector
   input       value_i;  //..state input
   input       next_i;   //..next bit in status vector (i+1)
   input       actual_i; //..actual registered bit in status vector (i)
@@ -41,7 +42,6 @@ module status_valid_logic
     case({pull_i, push_i})
       NN:  begin  //..nothing happens
         q_o     = actual_i;
-        carry_o = 1'b0;
       end
       NP:  begin  //..push a new entry
         if(update_en_a)
@@ -53,7 +53,7 @@ module status_valid_logic
         q_o = next_i;
       end
       PP:  begin  //..push a new entry, as well, pull the oldest entry
-        if(valid_i) begin
+        if(~empty_i) begin
           if(update_en_b)
             q_o = value_i;
           else
@@ -65,4 +65,4 @@ module status_valid_logic
     endcase
   end
 
-endmodule // status_valid_logic
+endmodule // status_value_logic
