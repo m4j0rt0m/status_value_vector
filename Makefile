@@ -47,8 +47,10 @@ veritedium:
 lint: $(PRJ_SRC)
 	$(LINT) $(LINT_FLAGS) $^
 
-sim: $(OUTPUT_DIR)/$(TOP_MODULE_SIM).vcd $(TESTBENCH_SRC)
+sim-all: $(OUTPUT_DIR)/$(TOP_MODULE_SIM).vcd $(TESTBENCH_SRC)
 	@(gtkwave $< > /dev/null 2>&1 &)
+
+sim: $(OUTPUT_DIR)/$(TOP_MODULE_SIM).vcd $(TESTBENCH_SRC)
 
 del-bak:
 	find ./* -name "*~" -delete
