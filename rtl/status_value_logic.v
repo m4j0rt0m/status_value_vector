@@ -1,5 +1,5 @@
 /*
- *  File:                   status_valid_logic.v
+ *  File:                   status_value_logic.v
  *  Description:            Combinational logic for the vector update
  *  Project:                Status Valid Vector
  *  Author:                 Abraham J. Ruiz R. (https://github.com/m4j0rt0m)
