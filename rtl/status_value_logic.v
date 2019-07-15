@@ -6,6 +6,9 @@
  *  Revision:               0.1 - First version
  */
 module status_value_logic
+# (
+    parameter WIDTH = 1
+  )
 (/*AUTOARG*/
    // Outputs
    q_o,
@@ -15,17 +18,17 @@ module status_value_logic
    );
 
   /* ports */
-  input       push_i;   //..push a new entry
-  input       pull_i;   //..pull an entry from queue
-  input       update_i; //..update or not the status vector bit
-  input       valid_i;  //..valid update mask bit (i)
-  input       carry_i;  //..next update mask bit (i+1)
-  input       empty_i;  //..empty status vector
-  input       value_i;  //..state input
-  input       next_i;   //..next bit in status vector (i+1)
-  input       actual_i; //..actual registered bit in status vector (i)
+  input                   push_i;   //..push a new entry
+  input                   pull_i;   //..pull an entry from queue
+  input                   update_i; //..update or not the status vector bit
+  input                   valid_i;  //..valid update mask bit (i)
+  input                   carry_i;  //..next update mask bit (i+1)
+  input                   empty_i;  //..empty status vector
+  input       [WIDTH-1:0] value_i;  //..state input
+  input       [WIDTH-1:0] next_i;   //..next bit in status vector (i+1)
+  input       [WIDTH-1:0] actual_i; //..actual registered bit in status vector (i)
 
-  output reg  q_o;      //..bit to be registered in status vector (i)
+  output reg  [WIDTH-1:0] q_o;      //..bit to be registered in status vector (i)
 
   /* local parameters <push and pull> */
   localparam  NN        = 2'b00;  //..neither push nor pull (there is no change)

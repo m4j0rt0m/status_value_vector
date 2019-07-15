@@ -7,7 +7,8 @@
  */
 module status_value_vector
 # (
-    parameter DEPTH = 16
+    parameter DEPTH = 64,
+    parameter WIDTH = 8
   )
 (/*AUTOARG*/
    // Outputs
@@ -17,32 +18,38 @@ module status_value_vector
    );
 
   /* ports */
-  input       clk_i;    //..clock signal
-  input       rsn_i;    //..active low reset
-  input       push_i;   //..push a new status entry
-  input       pull_i;   //..pull the next oldest entry
-  input       value_i;  //..update value
-  output      value_o;  //..next value entry
-  output      valid_o;  //..valid entry in the status vector
-  output      full_o;   //..status vector is full
+  input               clk_i;    //..clock signal
+  input               rsn_i;    //..active low reset
+  input               push_i;   //..push a new status entry
+  input               pull_i;   //..pull the next oldest entry
+  input   [WIDTH-1:0] value_i;  //..update value
+  output  [WIDTH-1:0] value_o;  //..next value entry
+  output              valid_o;  //..valid entry in the status vector
+  output              full_o;   //..status vector is full
 
   /* integers and genvars */
+  integer i;
   genvar I;
 
   /* regs and wires */
   wire              empty;
-  wire  [DEPTH-1:0] nxt_vector_d;
-  wire  [DEPTH-1:0] status_vector_d;
+  wire  [WIDTH-1:0] nxt_vector_d    [DEPTH-1:0];
+  wire  [WIDTH-1:0] status_vector_d [DEPTH-1:0];
   wire  [DEPTH-1:0] update_vector_d;
   wire  [DEPTH-1:0] carry_vector_d;
   reg   [DEPTH-1:0] valid_vector_q;
-  reg   [DEPTH-1:0] status_vector_q;
+  reg   [WIDTH-1:0] status_vector_q [DEPTH-1:0];
 
   /* empty/occupied vector */
   assign  empty           = ~valid_vector_q[0];
 
   /* expand vectors assignment */
-  assign  nxt_vector_d    = {1'b0, status_vector_q[DEPTH-1:1]};
+  generate
+    assign  nxt_vector_d[DEPTH-1] = {WIDTH{1'b0}};
+    for(I=0; I<(DEPTH-1); I=I+1)  begin: nxt_vector_assignment
+      assign  nxt_vector_d[I] = status_vector_q[I+1];
+    end
+  endgenerate
   assign  update_vector_d = {valid_vector_q[DEPTH-2:0], 1'b1};
   assign  carry_vector_d  = {1'b0, valid_vector_q[DEPTH-1:1]};
 
@@ -79,6 +86,9 @@ module status_value_vector
   generate
     for(I=0; I<DEPTH; I=I+1)  begin:  comb_logic
       status_value_logic
+        # (
+            .WIDTH    (WIDTH)
+          )
         status_value_logic_inst (
             .push_i   (push_i),
             .pull_i   (pull_i),
@@ -96,10 +106,12 @@ module status_value_vector
 
   /* status vector */
   always @ (posedge clk_i, negedge rsn_i) begin
-    if(~rsn_i)
-      status_vector_q <=  {DEPTH{1'b0}};
-    else
-      status_vector_q <=  status_vector_d;
+    for(i=0; i<DEPTH; i=i+1)  begin
+      if(~rsn_i)
+        status_vector_q[i] <=  {WIDTH{1'b0}};
+      else
+        status_vector_q[i] <=  status_vector_d[i];
+    end
   end
 
   /* output assignments */

@@ -12,24 +12,26 @@ module status_value_vector_tb ();
   localparam  FREQ_CLK  = 50000000;
   localparam  CLK_F     = (1000000000 / FREQ_CLK) / 2;
   localparam  DEPTH     = 32;
+  localparam  WIDTH     = 4;
 
     /* defines */
   `define CYCLES(cycles)  (CLK_F*2*cycles)
 
   /* regs and wires */
-  reg   clk_i;    //..clock signal
-  reg   rsn_i;    //..active low reset
-  reg   push_i;   //..push a new status entry
-  reg   pull_i;   //..pull the next oldest entry
-  reg   value_i;  //..value to be inserted into queue
-  wire  value_o;  //..next value from status vector
-  wire  valid_o;  //..valid entry in the status vector
-  wire  full_o;   //..status vector is full
+  reg               clk_i;    //..clock signal
+  reg               rsn_i;    //..active low reset
+  reg               push_i;   //..push a new status entry
+  reg               pull_i;   //..pull the next oldest entry
+  reg   [WIDTH-1:0] value_i;  //..value to be inserted into queue
+  wire  [WIDTH-1:0] value_o;  //..next value from status vector
+  wire              valid_o;  //..valid entry in the status vector
+  wire              full_o;   //..status vector is full
 
   /* dut */
   status_value_vector
     # (
-        .DEPTH  (DEPTH)
+        .DEPTH  (DEPTH),
+        .WIDTH  (WIDTH)
       )
     dut (
         .clk_i (clk_i),
@@ -58,19 +60,23 @@ module status_value_vector_tb ();
 
   /* simulation */
   always  begin
-    $dumpfile("status_value_vector.vcd");
-    $dumpvars();
     #`CYCLES(4)   rsn_i = 1;
     #`CYCLES(1)   push_i  = 1;
-                  value_i = 1;
     #`CYCLES(4)   push_i  = 0;
                   pull_i  = 1;
     #`CYCLES(5)   push_i  = 1;
-                  value_i = 0;
-    #`CYCLES(2)   value_i = 1;
-    #`CYCLES(4)   push_i  = 0;
-                  value_i = 0;
-    #`CYCLES(32)  $finish;
+    #`CYCLES(2)   push_i  = 0;
+                  pull_i  = 0;
+//    #`CYCLES(2)   pull_i  = 1;
+    #`CYCLES(6)   push_i  = 1;
+  end
+  always  begin
+    $dumpfile("status_value_vector.vcd");
+    $dumpvars();
+    #`CYCLES(1000)  $finish;
+  end
+  always  begin
+    #`CYCLES(1)   value_i = value_i + 1;
   end
 
 endmodule // status_value_vector_tb
