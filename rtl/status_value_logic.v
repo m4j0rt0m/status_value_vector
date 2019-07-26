@@ -20,6 +20,7 @@ module status_value_logic
   /* ports */
   input                   push_i;   //..push a new entry
   input                   pull_i;   //..pull an entry from queue
+  input                   set_i;    //..set last entry with "1"
   input                   update_i; //..update or not the status vector bit
   input                   valid_i;  //..valid update mask bit (i)
   input                   carry_i;  //..next update mask bit (i+1)
@@ -31,14 +32,19 @@ module status_value_logic
   output reg  [WIDTH-1:0] q_o;      //..bit to be registered in status vector (i)
 
   /* local parameters <push and pull> */
-  localparam  NN        = 2'b00;  //..neither push nor pull (there is no change)
-  localparam  NP        = 2'b01;  //..push and no pull
-  localparam  PN        = 2'b10;  //..pull and no push
-  localparam  PP        = 2'b11;  //..both push and pull
+  localparam  NNN = 3'b000;  //..neither push nor pull (no set last) (there is no change)
+  localparam  NNP = 3'b001;  //..push and no pull (no set last)
+  localparam  NPN = 3'b010;  //..pull and no push (no set last)
+  localparam  NPP = 3'b011;  //..both push and pull (no set last)
+  localparam  PNN = 3'b100;  //..neither push nor pull (set last)
+  localparam  PNP = 3'b101;  //..push and no pull (set last)
+  localparam  PPN = 3'b110;  //..pull and no push (set last)
+  localparam  PPP = 3'b111;  //..both push and pull (set last)
 
   /* update mask bits (working as tail pointers, head pointer always in [0]) */
   wire  update_en_a = update_i & ~valid_i;  //..update-bit enable (i), as a tail pointer
   wire  update_en_b = valid_i & ~carry_i;   //..update-bit enable (i+1), modified tail pointer
+  wire  set_en_a    = set_i & 
 
   /* logic */
   always @ (*) begin

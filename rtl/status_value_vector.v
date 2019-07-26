@@ -23,6 +23,7 @@ module status_value_vector
   input               push_i;   //..push a new status entry
   input               pull_i;   //..pull the next oldest entry
   input   [WIDTH-1:0] value_i;  //..update value
+  input               set_i;    //..set last entry
   output  [WIDTH-1:0] value_o;  //..next value entry
   output              valid_o;  //..valid entry in the status vector
   output              full_o;   //..status vector is full
@@ -92,6 +93,7 @@ module status_value_vector
         status_value_logic_inst (
             .push_i   (push_i),
             .pull_i   (pull_i),
+            .set_i    (set_i),
             .update_i (update_vector_d[I]),
             .valid_i  (valid_vector_q[I]),
             .carry_i  (carry_vector_d[I]),
