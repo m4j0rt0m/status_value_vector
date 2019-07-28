@@ -14,19 +14,20 @@ module status_value_vector
    // Outputs
    value_o, valid_o, full_o,
    // Inputs
-   clk_i, rsn_i, push_i, pull_i, value_i
+   clk_i, rsn_i, push_i, pull_i, set_i, value_i, set_value_i
    );
 
   /* ports */
-  input               clk_i;    //..clock signal
-  input               rsn_i;    //..active low reset
-  input               push_i;   //..push a new status entry
-  input               pull_i;   //..pull the next oldest entry
-  input   [WIDTH-1:0] value_i;  //..update value
-  input               set_i;    //..set last entry
-  output  [WIDTH-1:0] value_o;  //..next value entry
-  output              valid_o;  //..valid entry in the status vector
-  output              full_o;   //..status vector is full
+  input               clk_i;        //..clock signal
+  input               rsn_i;        //..active low reset
+  input               push_i;       //..push a new status entry
+  input               pull_i;       //..pull the next oldest entry
+  input               set_i;        //..set last entry
+  input   [WIDTH-1:0] value_i;      //..update value
+  input   [WIDTH-1:0] set_value_i;  //..set value for last updated entry
+  output  [WIDTH-1:0] value_o;      //..next value entry
+  output              valid_o;      //..valid entry in the status vector
+  output              full_o;       //..status vector is full
 
   /* integers and genvars */
   integer i;
@@ -38,6 +39,7 @@ module status_value_vector
   wire  [WIDTH-1:0] status_vector_d [DEPTH-1:0];
   wire  [DEPTH-1:0] update_vector_d;
   wire  [DEPTH-1:0] carry_vector_d;
+  wire  [DEPTH-1:0] last_vector_d;
   reg   [DEPTH-1:0] valid_vector_q;
   reg   [WIDTH-1:0] status_vector_q [DEPTH-1:0];
 
@@ -53,6 +55,7 @@ module status_value_vector
   endgenerate
   assign  update_vector_d = {valid_vector_q[DEPTH-2:0], 1'b1};
   assign  carry_vector_d  = {1'b0, valid_vector_q[DEPTH-1:1]};
+  assign  last_vector_d   = {2'b00, valid_vector_q[DEPTH-1:2]};
 
   /* valid vector */
   always @ (posedge clk_i, negedge rsn_i) begin
@@ -91,17 +94,19 @@ module status_value_vector
             .WIDTH    (WIDTH)
           )
         status_value_logic_inst (
-            .push_i   (push_i),
-            .pull_i   (pull_i),
-            .set_i    (set_i),
-            .update_i (update_vector_d[I]),
-            .valid_i  (valid_vector_q[I]),
-            .carry_i  (carry_vector_d[I]),
-            .empty_i  (empty),
-            .value_i  (value_i),
-            .next_i   (nxt_vector_d[I]),
-            .actual_i (status_vector_q[I]),
-            .q_o      (status_vector_d[I])
+            .push_i       (push_i),
+            .pull_i       (pull_i),
+            .set_i        (set_i),
+            .update_i     (update_vector_d[I]),
+            .valid_i      (valid_vector_q[I]),
+            .carry_i      (carry_vector_d[I]),
+            .last_i       (last_vector_d[I]),
+            .empty_i      (empty),
+            .value_i      (value_i),
+            .set_value_i  (set_value_i),
+            .next_i       (nxt_vector_d[I]),
+            .actual_i     (status_vector_q[I]),
+            .q_o          (status_vector_d[I])
           );
     end
   endgenerate
