@@ -8,7 +8,7 @@
 module status_value_vector
 # (
     parameter DEPTH = 64,
-    parameter WIDTH = 8
+    parameter WIDTH = 1
   )
 (/*AUTOARG*/
    // Outputs
