@@ -83,6 +83,12 @@ sim-all: $(OUTPUT_DIR)/$(TOP_MODULE_SIM).vcd $(TESTBENCH_SRC)
 
 sim: $(OUTPUT_DIR)/$(TOP_MODULE_SIM).vcd $(TESTBENCH_SRC)
 
+run-sim: $(TESTBENCH_SRC) $(PRJ_SRC) $(PRJ_HEADERS)
+	mkdir -p $(OUTPUT_DIR)
+	$(SIM) $(SIM_FLAGS) $^
+	$(RUN) $(RUN_FLAGS) $(OUTPUT_DIR)/$(TOP_MODULE_SIM).tb
+	mv $(TOP_MODULE_SIM).vcd $(OUTPUT_DIR)/$(TOP_MODULE_SIM).vcd
+
 project: compile
 
 compile: veritedium create_project set_pinout compile_flow
