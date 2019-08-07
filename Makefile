@@ -74,6 +74,7 @@ all: veritedium lint sim
 
 veritedium:
 	$(foreach SRC,$(PRJ_SRC),$(call veritedium-command,$(SRC)))
+	$(foreach SRC,$(TESTBENCH_SRC),$(call veritedium-command,$(SRC)))
 
 lint: $(PRJ_SRC)
 	$(LINT) $(LINT_FLAGS) $^

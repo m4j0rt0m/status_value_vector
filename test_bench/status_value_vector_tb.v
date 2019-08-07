@@ -8,15 +8,16 @@
 module status_value_vector_tb ();
 
   /* local parameters */
-  localparam  FREQ_CLK  = 50000000;
-  localparam  CLK_F     = (1000000000 / FREQ_CLK) / 2;
-  localparam  DEPTH     = 32;
-  localparam  WIDTH     = 4;
+  localparam  FREQ_CLK  = 50;
+  localparam  CLK_F     = (1000 / FREQ_CLK) / 2;
+  localparam  DEPTH     = 8;
+  localparam  WIDTH     = 8;
+  localparam  SET_EN    = 1;
 
     /* defines */
   `define CYCLES(cycles)  (CLK_F*2*cycles)
 
-  /* regs and wires */
+  /* dut regs and wires */
   reg               clk_i;        //..clock signal
   reg               rsn_i;        //..active low reset
   reg               push_i;       //..push a new status entry
@@ -28,11 +29,17 @@ module status_value_vector_tb ();
   reg               set_i;        //..reupdate last value
   reg   [WIDTH-1:0] set_value_i;  //..reupdate value to be set
 
+  /* sim-dut regs and wires */
+  wire  [WIDTH-1:0] sim_value_o;  //..next value from sim-fifo
+  wire              sim_valid_o;  //..valid entry in the sim-fifo
+  wire              sim_full_o;   //..sim-fifo full
+
   /* dut */
   status_value_vector
     # (
         .DEPTH  (DEPTH),
-        .WIDTH  (WIDTH)
+        .WIDTH  (WIDTH),
+        .SET_EN (SET_EN)
       )
     dut (
         .clk_i (clk_i),
@@ -47,13 +54,43 @@ module status_value_vector_tb ();
         .set_value_i (set_value_i)
       );
 
+  /* behavioural sim dut model */
+  sim_fifo_behaviour
+    # (
+        .DEPTH  (DEPTH),
+        .WIDTH  (WIDTH)
+      )
+    sim_dut (
+        .clk_i (clk_i),
+        .rsn_i (rsn_i),
+        .push_i (push_i),
+        .pull_i (pull_i),
+        .value_i (value_i),
+        .value_o (sim_value_o),
+        .valid_o (sim_valid_o),
+        .full_o (sim_full_o),
+        .set_i (set_i),
+        .set_value_i (set_value_i)
+      );
+
+  integer idx;
+
   /* initial */
   initial begin
-    clk_i   = 0;
-    rsn_i   = 0;
-    push_i  = 0;
-    pull_i  = 0;
-    value_i = 0;
+    clk_i       = 0;
+    rsn_i       = 0;
+    push_i      = 0;
+    pull_i      = 0;
+    value_i     = 0;
+    set_i       = 0;
+    set_value_i = 0;
+    $dumpfile("status_value_vector.vcd");
+    $dumpvars(0, status_value_vector_tb);
+    $dumpvars(1, dut);
+    $dumpvars(1, sim_dut);
+    for (idx = 0; idx < DEPTH; idx = idx + 1) $dumpvars(1, sim_dut.sim_fifo_mem[idx]);
+    for (idx = 0; idx < DEPTH; idx = idx + 1) $dumpvars(1, dut.status_vector_q[idx]);
+    #`CYCLES(200000)  $finish;
   end
 
   /* clock signal */
@@ -73,17 +110,22 @@ module status_value_vector_tb ();
 
   /* simulation */
   always  begin
-    #`CYCLES(4)   rsn_i = 1;
-    #`CYCLES(2)   push_t(10);
-    #`CYCLES(1)   pull_t(5);
-//    #`CYCLES(1)   push_i  = 1;
-//    #`CYCLES(4)   push_i  = 0;
-//                  pull_i  = 1;
-//    #`CYCLES(5)   push_i  = 1;
-//    #`CYCLES(2)   push_i  = 0;
-//                  pull_i  = 0;
-//    #`CYCLES(2)   pull_i  = 1;
-//    #`CYCLES(6)   push_i  = 1;
+    #`CYCLES(4)   rsn_i = 1;  //..remove reset
+    #`CYCLES(400) rsn_i = 0;  //..set a reset
+  end
+
+  always  begin
+    #`CYCLES(($urandom%10)) push_t(($urandom%10));
+  end
+
+  always  begin
+    #`CYCLES(($urandom%10)) pull_t(($urandom%10));
+  end
+
+  always  begin
+    #`CYCLES(($urandom%10)) set_i       = 1;
+                            set_value_i = ($urandom%256);
+    #`CYCLES(1)             set_i       = 0;
   end
 
   /* push data task */
@@ -94,6 +136,7 @@ module status_value_vector_tb ();
       push_counter  = 0;
       while (push_counter != push_amount) begin
         push_i  = 1;
+        value_i = $urandom%256;
         #`CYCLES(1);
         push_counter = push_counter + 1;
         push_i  = 0;
@@ -116,13 +159,20 @@ module status_value_vector_tb ();
     end
   endtask
 
-  always  begin
-    $dumpfile("status_value_vector.vcd");
-    $dumpvars();
-    #`CYCLES(1000)  $finish;
-  end
-  always  begin
-    #`CYCLES(1)   value_i = value_i + 1;
+  /* evaluation */
+  reg error;
+  initial error = 0;
+  always @ (posedge clk_i)  begin
+    if(sim_valid_o != valid_o)
+      error =  1'b1;
+    else if(valid_o)  begin
+      if(value_o != sim_value_o)
+        error = 1'b1;
+      else
+        error = 1'b0;
+    end
+    else
+      error = 1'b0;
   end
 
 endmodule // status_value_vector_tb
