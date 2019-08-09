@@ -90,8 +90,12 @@ module status_value_logic
                   q_o = next_i;
               end
             end
-            else
-              q_o = value_i;
+            else  begin
+              if(update_en_a)
+                q_o = value_i;
+              else
+                q_o = next_i;
+            end
           end
         endcase
       end
@@ -118,8 +122,12 @@ module status_value_logic
               else
                 q_o = next_i;
             end
-            else
-              q_o = value_i;
+            else  begin
+              if(update_en_a)
+                q_o = value_i;
+              else
+                q_o = next_i;
+            end
           end
         endcase
       end
