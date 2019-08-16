@@ -4,28 +4,35 @@
  *  Project:                Status Value Vector
  *  Author:                 Abraham J. Ruiz R. (https://github.com/m4j0rt0m)
  *  Revision:               0.1 - First version
+ *                          0.2 - Re-update feature included
  */
 module status_value_vector
 # (
-    parameter DEPTH = 64,
-    parameter WIDTH = 1
+    parameter DEPTH   = 64,
+    parameter WIDTH   = 8,
+    parameter SET_EN  = 0
   )
 (/*AUTOARG*/
    // Outputs
    value_o, valid_o, full_o,
    // Inputs
-   clk_i, rsn_i, push_i, pull_i, value_i
+   clk_i, rsn_i, push_i, pull_i, value_i, set_i, set_value_i
    );
 
   /* ports */
-  input               clk_i;    //..clock signal
-  input               rsn_i;    //..active low reset
-  input               push_i;   //..push a new status entry
-  input               pull_i;   //..pull the next oldest entry
-  input   [WIDTH-1:0] value_i;  //..update value
-  output  [WIDTH-1:0] value_o;  //..next value entry
-  output              valid_o;  //..valid entry in the status vector
-  output              full_o;   //..status vector is full
+  input               clk_i;        //..clock signal
+  input               rsn_i;        //..active low reset
+  input               push_i;       //..push a new status entry
+  input               pull_i;       //..pull the next oldest entry
+  input   [WIDTH-1:0] value_i;      //..update value
+  output  [WIDTH-1:0] value_o;      //..next value entry
+  output              valid_o;      //..valid entry in the status vector
+  output              full_o;       //..status vector is full
+
+  /* verilator lint_off UNUSED */
+  input               set_i;        //..set last entry
+  input   [WIDTH-1:0] set_value_i;  //..set value for last updated entry
+  /* verilator lint_on UNUSED */
 
   /* integers and genvars */
   integer i;
@@ -40,6 +47,10 @@ module status_value_vector
   reg   [DEPTH-1:0] valid_vector_q;
   reg   [WIDTH-1:0] status_vector_q [DEPTH-1:0];
 
+  /* verilator lint_off UNUSED */
+  wire  [DEPTH-1:0] last_vector_d;
+  /* verilator lint_on UNUSED */
+
   /* empty/occupied vector */
   assign  empty           = ~valid_vector_q[0];
 
@@ -52,6 +63,7 @@ module status_value_vector
   endgenerate
   assign  update_vector_d = {valid_vector_q[DEPTH-2:0], 1'b1};
   assign  carry_vector_d  = {1'b0, valid_vector_q[DEPTH-1:1]};
+  assign  last_vector_d   = {2'b00, valid_vector_q[DEPTH-1:2]};
 
   /* valid vector */
   always @ (posedge clk_i, negedge rsn_i) begin
@@ -87,19 +99,23 @@ module status_value_vector
     for(I=0; I<DEPTH; I=I+1)  begin:  comb_logic
       status_value_logic
         # (
-            .WIDTH    (WIDTH)
+            .WIDTH    (WIDTH),
+            .SET_EN   (SET_EN)
           )
         status_value_logic_inst (
-            .push_i   (push_i),
-            .pull_i   (pull_i),
-            .update_i (update_vector_d[I]),
-            .valid_i  (valid_vector_q[I]),
-            .carry_i  (carry_vector_d[I]),
-            .empty_i  (empty),
-            .value_i  (value_i),
-            .next_i   (nxt_vector_d[I]),
-            .actual_i (status_vector_q[I]),
-            .q_o      (status_vector_d[I])
+            .push_i       (push_i),
+            .pull_i       (pull_i),
+            .set_i        (set_i),
+            .update_i     (update_vector_d[I]),
+            .valid_i      (valid_vector_q[I]),
+            .carry_i      (carry_vector_d[I]),
+            .last_i       (last_vector_d[I]),
+            .empty_i      (empty),
+            .value_i      (value_i),
+            .set_value_i  (set_value_i),
+            .next_i       (nxt_vector_d[I]),
+            .actual_i     (status_vector_q[I]),
+            .q_o          (status_vector_d[I])
           );
     end
   endgenerate
@@ -115,8 +131,8 @@ module status_value_vector
   end
 
   /* output assignments */
-  assign value_o  = status_vector_q[0];
-  assign valid_o  = valid_vector_q[0];
-  assign full_o   = valid_vector_q[DEPTH-1];
+  assign value_o      = status_vector_q[0];
+  assign valid_o      = valid_vector_q[0];
+  assign full_o       = valid_vector_q[DEPTH-1];
 
 endmodule // status_value_vector

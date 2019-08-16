@@ -11,26 +11,36 @@ set_location_assignment PIN_C3 -to pull_i
 set_location_assignment PIN_B4 -to valid_o
 set_location_assignment PIN_B5 -to full_o
 
-set_location_assignment PIN_D5 -to value_i
-set_location_assignment PIN_A5 -to value_o
+#set_location_assignment PIN_D5 -to value_i
+#set_location_assignment PIN_R14 -to set_value_i
+#set_location_assignment PIN_A5 -to value_o
 
-#set_location_assignment PIN_D5 -to value_i[0]
-#set_location_assignment PIN_A6 -to value_i[1]
-#set_location_assignment PIN_D6 -to value_i[2]
-#set_location_assignment PIN_C6 -to value_i[3]
-#set_location_assignment PIN_E6 -to value_i[4]
-#set_location_assignment PIN_D8 -to value_i[5]
-#set_location_assignment PIN_F8 -to value_i[6]
-#set_location_assignment PIN_E9 -to value_i[7]
+set_location_assignment PIN_D5 -to value_i[0]
+set_location_assignment PIN_A6 -to value_i[1]
+set_location_assignment PIN_D6 -to value_i[2]
+set_location_assignment PIN_C6 -to value_i[3]
+set_location_assignment PIN_E6 -to value_i[4]
+set_location_assignment PIN_D8 -to value_i[5]
+set_location_assignment PIN_F8 -to value_i[6]
+set_location_assignment PIN_E9 -to value_i[7]
 
-#set_location_assignment PIN_A5 -to value_o[0]
-#set_location_assignment PIN_B6 -to value_o[1]
-#set_location_assignment PIN_B7 -to value_o[2]
-#set_location_assignment PIN_A7 -to value_o[3]
-#set_location_assignment PIN_C8 -to value_o[4]
-#set_location_assignment PIN_E7 -to value_o[5]
-#set_location_assignment PIN_E8 -to value_o[6]
-#set_location_assignment PIN_F9 -to value_o[7]
+set_location_assignment PIN_R14 -to set_value_i[0]
+set_location_assignment PIN_P15 -to set_value_i[1]
+set_location_assignment PIN_R16 -to set_value_i[2]
+set_location_assignment PIN_L16 -to set_value_i[3]
+set_location_assignment PIN_N9 -to set_value_i[4]
+set_location_assignment PIN_N12 -to set_value_i[5]
+set_location_assignment PIN_P11 -to set_value_i[6]
+set_location_assignment PIN_T10 -to set_value_i[7]
+
+set_location_assignment PIN_A5 -to value_o[0]
+set_location_assignment PIN_B6 -to value_o[1]
+set_location_assignment PIN_B7 -to value_o[2]
+set_location_assignment PIN_A7 -to value_o[3]
+set_location_assignment PIN_C8 -to value_o[4]
+set_location_assignment PIN_E7 -to value_o[5]
+set_location_assignment PIN_E8 -to value_o[6]
+set_location_assignment PIN_F9 -to value_o[7]
 
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to clk_i
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to rsn_i
@@ -40,26 +50,36 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to pull_i
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to valid_o
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to full_o
 
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o
+#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i
+#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to set_value_i
+#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o
 
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[0]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[1]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[2]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[3]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[4]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[5]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[6]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[7]
-#
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[0]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[1]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[2]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[3]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[4]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[5]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[6]
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_i[7]
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to set_value_i[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to set_value_i[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to set_value_i[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to set_value_i[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to set_value_i[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to set_value_i[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to set_value_i[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to set_value_i[7]
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to value_o[7]
 
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS_WEAK_PULLUP "AS INPUT TRI-STATED"
 

@@ -74,6 +74,7 @@ all: veritedium lint sim
 
 veritedium:
 	$(foreach SRC,$(PRJ_SRC),$(call veritedium-command,$(SRC)))
+	$(foreach SRC,$(TESTBENCH_SRC),$(call veritedium-command,$(SRC)))
 
 lint: $(PRJ_SRC)
 	$(LINT) $(LINT_FLAGS) $^
@@ -82,6 +83,12 @@ sim-all: $(OUTPUT_DIR)/$(TOP_MODULE_SIM).vcd $(TESTBENCH_SRC)
 	@(gtkwave $< > /dev/null 2>&1 &)
 
 sim: $(OUTPUT_DIR)/$(TOP_MODULE_SIM).vcd $(TESTBENCH_SRC)
+
+run-sim: $(TESTBENCH_SRC) $(PRJ_SRC) $(PRJ_HEADERS)
+	mkdir -p $(OUTPUT_DIR)
+	$(SIM) $(SIM_FLAGS) $^
+	$(RUN) $(RUN_FLAGS) $(OUTPUT_DIR)/$(TOP_MODULE_SIM).tb
+	mv $(TOP_MODULE_SIM).vcd $(OUTPUT_DIR)/$(TOP_MODULE_SIM).vcd
 
 project: compile
 
